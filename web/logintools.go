@@ -3,6 +3,8 @@ package web
 import (
 	"net/http"
 	"html"
+	"strings"
+	"fmt"
 )
 
 const (
@@ -17,6 +19,6 @@ func RedirectLinkAccountAndReturn(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Refusing to obey relative redirect", 400)
 		return
 	}
-	new_url := fmt.Sprintf("%s?returnto=%s", PATH_LINK_ACCOUNT, return_to)
+	new_url := fmt.Sprintf("%s?returnto=%s", PATH_LINK_ACCOUNT, html.EscapeString(return_to))
 	http.Redirect(w, req, new_url, 303)
 }
