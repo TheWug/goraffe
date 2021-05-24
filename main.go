@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"io"
 	"net/http"
 	"html/template"
@@ -18,8 +19,13 @@ type ClientSettings struct {
 func GetClientSettings() ClientSettings {
 	return ClientSettings{
 		PatreonApiClientId: "wv473kvTpLjcUliP7aj7JAOYxKgCWefEagZpNsercCE_EmSvVJcRJv_-B_PCIeX8",
-		PatreonLoginRedirect: "https://patreon.wuggl.es/login_redirect",
+		PatreonLoginRedirect: "https://local.wuggl.es/login_redirect",
 	}
+}
+
+func templateWrite(w io.WriteCloser, t *template.Template) {
+	t.Execute(w, GetClientSettings())
+	w.Close()
 }
 
 func LinkAccount(w http.ResponseWriter, req *http.Request) {
@@ -35,9 +41,10 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 ))
 
 	rp, wp := io.Pipe()
-	go templ.Execute(wp, GetClientSettings())
+	go templateWrite(wp, templ)
 
 	io.Copy(w, rp)
+	rp.Close()
 }
 
 func NewRaffle(w http.ResponseWriter, req *http.Request) {
@@ -52,13 +59,19 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	rp, wp := io.Pipe()
-	go templ.Execute(wp, nil)
+	go templateWrite(wp, templ)
 
 	auth.Put(w, login)
 	io.Copy(w, rp) // XXX listen for errors
+	rp.Close()
 }
 
 func main() {
-	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	fmt.Println("goraffe!")
+	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
+	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
+	err := http.ListenAndServe(":3001", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err.Error())
+	}
 }
