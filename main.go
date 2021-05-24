@@ -6,21 +6,28 @@ import (
 	"io"
 	"net/http"
 	"html/template"
+	"encoding/json"
+	"io/ioutil"
 
 	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
 )
 
 type ClientSettings struct {
-	PatreonApiClientId string
-	PatreonLoginRedirect string
+	PatreonApiClientId     string `json:"patreon_api_client_id"`
+	PatreonApiClientSecret string `json:"patreon_api_client_secret"`
+	PatreonLoginRedirect   string `json:"patreon_login_redirect"`
 }
 
 func GetClientSettings() ClientSettings {
-	return ClientSettings{
-		PatreonApiClientId: "wv473kvTpLjcUliP7aj7JAOYxKgCWefEagZpNsercCE_EmSvVJcRJv_-B_PCIeX8",
-		PatreonLoginRedirect: "https://local.wuggl.es:3001/patreon_return",
+	var settings ClientSettings
+	bytes, err := ioutil.ReadFile("./settings.json")
+	if err != nil {
+		log.Fatal("Read settings file: ", err.Error())
 	}
+
+	json.Unmarshal(bytes, &settings)
+	return settings
 }
 
 func templateWrite(w io.WriteCloser, t *template.Template) {
