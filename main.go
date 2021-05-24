@@ -19,7 +19,7 @@ type ClientSettings struct {
 func GetClientSettings() ClientSettings {
 	return ClientSettings{
 		PatreonApiClientId: "wv473kvTpLjcUliP7aj7JAOYxKgCWefEagZpNsercCE_EmSvVJcRJv_-B_PCIeX8",
-		PatreonLoginRedirect: "https://local.wuggl.es/login_redirect",
+		PatreonLoginRedirect: "https://local.wuggl.es:3001/patreon_return",
 	}
 }
 
