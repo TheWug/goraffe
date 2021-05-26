@@ -147,7 +147,14 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tiers, _ := patreon.GetCampaignTiers(&login.Patreon)
+	tiers, err := patreon.GetCampaignTiers(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	}
+	
+	_ = tiers
 
 	_ = tiers
 
