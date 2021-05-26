@@ -109,7 +109,7 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 	}
 
 	*s = Session{
-		PatreonToken: bs.PatreonToken,
+		Patreon:      bs.Patreon,
 		SessionDate:  session_date,
 	}
 
