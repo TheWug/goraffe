@@ -171,15 +171,14 @@ func EncryptAndSign(obj interface{}) (string, error) {
 	return o, nil
 }
 
-func DecryptAndValidate(es string) (Session, error) {
-	var s Session
+func DecryptAndValidate(es string, obj interface{}) error {
 	ciphertext, err := base64.RawURLEncoding.DecodeString(es)
 	if err != nil {
-		return s, err
+		return err
 	}
 
 	if len(ciphertext) < gcm_cipher.NonceSize() {
-		return s, errors.New("invalid ciphertext size")
+		return errors.New("invalid ciphertext size")
 	}
 
 	nonce := ciphertext[:gcm_cipher.NonceSize()]
@@ -187,12 +186,12 @@ func DecryptAndValidate(es string) (Session, error) {
 
 	plaintext, err := gcm_cipher.Open(ciphertext[:0], nonce, ciphertext, nil)
 
-	err = json.Unmarshal(plaintext, &s)
+	err = json.Unmarshal(plaintext, obj)
 	if err != nil {
-		return s, err
+		return err
 	}
 
-	return s, nil
+	return nil
 }
 
 var one_week time.Duration = time.Hour * 24 * 7
