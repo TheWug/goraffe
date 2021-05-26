@@ -8,8 +8,12 @@ import (
 
 var BadLogin error = errors.New("Invalid or expired patreon auth token")
 
-type TierArray struct {
+type Tier struct {
+	Name              string
+	ContributionCents int
 }
+
+type TierArray []Tier
 
 type basicPatreonSession struct {
 	AccessToken  string `json:"access_token,omitempty"`
