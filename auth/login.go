@@ -200,18 +200,21 @@ func Get(req *http.Request) *Session {
 	// fetch the session cookie and bail if it's unset.
 	session_blob, err := req.Cookie("session")
 	if err != nil {
+		fmt.Println("no cookie at all")
 		return nil
 	}
 
 	// decrypt the session cookie into a session and bail if there's an error of any kind.
 	session, err := DecryptAndValidate(session_blob.Value)
 	if err != nil {
+		fmt.Println("cookie decrypted badly: ", err.Error())
 		// XXX log this error as it is likely either developer error or evidence of abuse
 		return nil
 	}
 
 	// check if session has expired and bail if so
 	if time.Now().Sub(session.SessionDate) > one_week {
+		fmt.Println("cookie is expired")
 		return nil
 	}
 
