@@ -54,6 +54,7 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 <input type="hidden" name="client_id" value="{{.Settings.PatreonApiClientId}}">
 <input type="hidden" name="redirect_uri" value="{{.Settings.PatreonLoginRedirect}}">
 <input type="hidden" name="scope" value="identity identity.memberships campaigns campaigns.members">
+<input type="hidden" name="state" value="{{.State}}">
 <input type="submit" value="Connect to your Patreon account">
 </form></body></html>`,
 ))
