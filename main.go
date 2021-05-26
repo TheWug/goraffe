@@ -32,8 +32,8 @@ func GetClientSettings() ClientSettings {
 	return settings
 }
 
-func templateWrite(w io.WriteCloser, t *template.Template) {
-	t.Execute(w, GetClientSettings())
+func templateWrite(w io.WriteCloser, t *template.Template, data interface{}) {
+	t.Execute(w, data)
 	w.Close()
 }
 
@@ -50,7 +50,9 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 ))
 
 	rp, wp := io.Pipe()
-	go templateWrite(wp, templ)
+	go templateWrite(wp, templ, map[string]interface{} {
+		"Settings": GetClientSettings(),
+	})
 
 	io.Copy(w, rp)
 	rp.Close()
@@ -68,7 +70,7 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	rp, wp := io.Pipe()
-	go templateWrite(wp, templ)
+	go templateWrite(wp, templ, nil)
 
 	auth.Put(w, login)
 	io.Copy(w, rp) // XXX listen for errors
