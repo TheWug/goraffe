@@ -50,7 +50,9 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 ))
 
 	rp, wp := io.Pipe()
-	go templateWrite(wp, templ)
+	go templateWrite(wp, templ, map[string]interface{} {
+		"Settings": GetClientSettings(),
+	})
 
 	io.Copy(w, rp)
 	rp.Close()
