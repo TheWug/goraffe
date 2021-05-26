@@ -187,3 +187,14 @@ func Put(w http.ResponseWriter, s *Session) {
 
 	http.SetCookie(w, &c)
 }
+
+func Delete(w http.ResponseWriter) {
+	var c http.Cookie
+	c.Name = sessionCookieName
+	c.Value = ""
+	c.MaxAge = -1
+	c.HttpOnly = true
+	c.SameSite = http.SameSiteStrictMode
+
+	http.SetCookie(w, &c)
+}
