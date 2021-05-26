@@ -225,7 +225,7 @@ func Get(req *http.Request) *Session {
 func Put(w http.ResponseWriter, s *Session) {
 	s.Update()
 	value, err := EncryptAndSign(*s)
-	if err == nil {
+	if err != nil {
 		// XXX log this
 		return
 	}
