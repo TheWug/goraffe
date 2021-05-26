@@ -32,8 +32,8 @@ func GetClientSettings() ClientSettings {
 	return settings
 }
 
-func templateWrite(w io.WriteCloser, t *template.Template) {
-	t.Execute(w, GetClientSettings())
+func templateWrite(w io.WriteCloser, t *template.Template, data interface{}) {
+	t.Execute(w, data)
 	w.Close()
 }
 
