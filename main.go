@@ -13,6 +13,7 @@ import (
 
 	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
+	"github.com/thewug/goraffe/patreon"
 )
 
 type ClientSettings struct {
@@ -148,7 +149,14 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tiers := patreon.GetCampaignTiers()
+	tiers, err := patreon.GetCampaignTiers(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	}
+	
+	_ = tiers
 
 	rp, wp := io.Pipe()
 	go templateWrite(wp, templ, nil)
