@@ -38,6 +38,17 @@ func templateWrite(w io.WriteCloser, t *template.Template, data interface{}) {
 }
 
 func LinkAccount(w http.ResponseWriter, req *http.Request) {
+	state_plain := auth.PatreonState{
+		ReturnTo: req.URL.Query().Get("returnto"),
+		IV: "9ryhar9sreaskt60j3m54",
+	}
+
+	state, err := auth.EncryptAndSign(state_plain)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Encryption: %s", err.Error()), 500)
+		return
+	}
+
 	templ := template.Must(template.New("connecttopatreonpage").Parse(
 `<html></head><title>Connect to Patreon</title></head><body>
 <form method="get" action="https://www.patreon.com/oauth2/authorize">
@@ -51,6 +62,7 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 
 	rp, wp := io.Pipe()
 	go templateWrite(wp, templ, map[string]interface{} {
+		"State": state,
 		"Settings": GetClientSettings(),
 	})
 
