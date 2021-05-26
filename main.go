@@ -158,6 +158,7 @@ func main() {
 	auth.Init(settings.AESPasskey1, settings.AESPasskey2)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
+	http.HandleFunc(web.PATH_ACCOUNT_LINKING, LinkAccountPatreonReturn)
 	err := http.ListenAndServe(":3001", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
