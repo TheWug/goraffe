@@ -145,7 +145,7 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 	}
 
 	rp, wp := io.Pipe()
-	go templateWrite(wp, templ)
+	go templateWrite(wp, templ, nil)
 
 	auth.Put(w, login)
 	io.Copy(w, rp) // XXX listen for errors
