@@ -2,8 +2,11 @@ package patreon
 
 import (
 	"time"
+	"errors"
 	"encoding/json"
 )
+
+var BadLogin error = errors.New("Invalid or expired patreon auth token")
 
 type TierArray struct {
 }
