@@ -151,9 +151,9 @@ func getCipher() cipher.AEAD {
 
 var gcm_cipher cipher.AEAD = getCipher()
 
-func EncryptAndSign(s Session) (string, error) {
+func EncryptAndSign(obj interface{}) (string, error) {
 	var o string
-	plaintext, err := json.Marshal(s)
+	plaintext, err := json.Marshal(obj)
 	if err != nil {
 		return o, err
 	}
