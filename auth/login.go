@@ -226,6 +226,7 @@ func Put(w http.ResponseWriter, s *Session) {
 	s.Update()
 	value, err := EncryptAndSign(*s)
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		// XXX log this
 		return
 	}
