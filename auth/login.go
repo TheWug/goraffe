@@ -103,11 +103,6 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 		return err
 	}
 
-	token_date, err := time.Parse(time.RFC3339, bs.TokenDate)
-	if err != nil {
-		return err
-	}
-
 	session_date, err := time.Parse(time.RFC3339, bs.SessionDate)
 	if err != nil {
 		return err
@@ -115,7 +110,6 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 
 	*s = Session{
 		PatreonToken: bs.PatreonToken,
-		TokenDate:    token_date,
 		SessionDate:  session_date,
 	}
 
