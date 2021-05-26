@@ -74,14 +74,14 @@ func (p *PatreonSession) UnmarshalJSON(j []byte) error {
 }
 
 type basicSession struct {
-	PatreonToken string `json:"patreon_token"`
 	TokenDate    string `json:"token_date"`
-	SessionDate  string `json:"session_date"`
+	Patreon      PatreonSession `json:"patreon,omitempty"`
+	SessionDate  string `json:"session_date,omitempty"`
 }
 
 type Session struct {
-	PatreonToken string
 	TokenDate    time.Time
+	Patreon      PatreonSession
 	SessionDate  time.Time
 }
 
@@ -91,8 +91,8 @@ func (s *Session) Update() {
 
 func (s Session) MarshalJSON() ([]byte, error) {
 	bs := basicSession{
-		PatreonToken: s.PatreonToken,
 		TokenDate:    s.TokenDate.Format(time.RFC3339),
+		Patreon:      s.Patreon,
 		SessionDate:  s.SessionDate.Format(time.RFC3339),
 	}
 
