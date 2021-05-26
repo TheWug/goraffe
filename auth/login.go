@@ -115,6 +115,11 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
+type PatreonState struct {
+	ReturnTo string `json:"return_to"`
+	IV       string `json:"iv"`
+}
+
 const aes_keystring string = "One may opine for an eternity about what makes a password secure, but in reality, it's all about luck, and setting oneself up to be lucky. 69 420 funny numb3r haha!@$%^&"
 const aes_keycoder  string = "xxxxxxxxxx69.420.000000000000000"
 var aes_key []byte = nil
