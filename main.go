@@ -144,6 +144,8 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	tiers := patreon.GetCampaignTiers()
+
 	rp, wp := io.Pipe()
 	go templateWrite(wp, templ, nil)
 
