@@ -139,9 +139,11 @@ func DecryptAndValidate(es string, obj interface{}) error {
 
 var one_week time.Duration = time.Hour * 24 * 7
 
+const sessionCookieName string = "session"
+
 func Get(req *http.Request) *Session {
 	// fetch the session cookie and bail if it's unset.
-	session_blob, err := req.Cookie("session")
+	session_blob, err := req.Cookie(sessionCookieName)
 	if err != nil {
 		return nil
 	}
@@ -171,7 +173,7 @@ func Put(w http.ResponseWriter, s *Session) {
 	}
 
 	var c http.Cookie
-	c.Name = "session"
+	c.Name = sessionCookieName
 	c.Value = value
 	c.Expires = s.SessionDate.Add(one_week)
 //	c.Secure = true
