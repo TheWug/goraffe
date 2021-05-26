@@ -115,6 +115,11 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
+type PatreonState struct {
+	ReturnTo string `json:"return_to"`
+	IV       string `json:"iv"`
+}
+
 var aes_key []byte = nil
 
 func Init(key, coder string) {
