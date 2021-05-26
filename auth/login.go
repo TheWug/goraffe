@@ -172,15 +172,14 @@ func EncryptAndSign(obj interface{}) (string, error) {
 	return o, nil
 }
 
-func DecryptAndValidate(es string) (Session, error) {
-	var s Session
+func DecryptAndValidate(es string, obj interface{}) error {
 	ciphertext, err := base64.RawURLEncoding.DecodeString(es)
 	if err != nil {
-		return s, err
+		return err
 	}
 
 	if len(ciphertext) < gcm_cipher.NonceSize() {
-		return s, errors.New("invalid ciphertext size")
+		return errors.New("invalid ciphertext size")
 	}
 
 	nonce := ciphertext[:gcm_cipher.NonceSize()]
@@ -188,12 +187,12 @@ func DecryptAndValidate(es string) (Session, error) {
 
 	plaintext, err := gcm_cipher.Open(ciphertext[:0], nonce, ciphertext, nil)
 
-	err = json.Unmarshal(plaintext, &s)
+	err = json.Unmarshal(plaintext, obj)
 	if err != nil {
-		return s, err
+		return err
 	}
 
-	return s, nil
+	return nil
 }
 
 var one_week time.Duration = time.Hour * 24 * 7
@@ -206,7 +205,8 @@ func Get(req *http.Request) *Session {
 	}
 
 	// decrypt the session cookie into a session and bail if there's an error of any kind.
-	session, err := DecryptAndValidate(session_blob.Value)
+	var session Session
+	err = DecryptAndValidate(session_blob.Value, &session)
 	if err != nil {
 		// XXX log this error as it is likely either developer error or evidence of abuse
 		return nil
