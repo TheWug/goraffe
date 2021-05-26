@@ -135,7 +135,11 @@ func LinkAccountPatreonReturn(w http.ResponseWriter, req *http.Request) {
 
 func NewRaffle(w http.ResponseWriter, req *http.Request) {
 	templ := template.Must(template.New("newrafflepage").Parse(
-`<html><head><title>New Raffle</title></head><body><p>Create a new raffle here!</body></html>`,
+`<html><head><title>New Raffle</title></head><body>
+<p>Create a new raffle here.</p>
+<form action="#">
+<input>
+</body></html>`,
 ))
 
 	login := auth.Get(req)
