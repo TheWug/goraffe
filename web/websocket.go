@@ -127,6 +127,12 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 )
 
+func (this *Client) readPump() {
+}
+
+func (this *Client) writePump() {
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
