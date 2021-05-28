@@ -236,14 +236,82 @@ func (this *Raffle) Draw() (*Entry, error) {
 }
 
 func CreateRaffle(owner int, name string, tiers []int32) (*Raffle, error) {
-	return nil, nil
+	tx, err := connection.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	u := uuid.New()
+	t := time.Now()
+
+	_, err = tx.Exec("insert into raffles (id, display, ts, owner, tiers) values ($1, $2, $3, $4, $5)",
+	                  u.String(), name, t.Unix(), owner, pq.Array(tiers))
+
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	raffle := Raffle{
+		Id: u.String(),
+		Owner: owner,
+		Tiers: tiers,
+		Timestamp: t.Unix(),
+	}
+
+	return &raffle, nil
 }
 
 func GetRaffle(tx *sql.Tx, object interface{}, parameter interface{}) error {
-	return nil
+	raffle_id, t1 := parameter.(string)
+	raffle, t2 := object.(*Raffle)
+	if !(t1 && t2) {
+		return errors.New("Invalid parameters to GetRaffle")
+	}
+
+	row := tx.QueryRow("select id, display, ts, owner, tiers, open from raffles where id = $1", raffle_id)
+
+	var tiers pq.Int32Array
+	err := row.Scan(&raffle.Id, &raffle.Display, &raffle.Timestamp, &raffle.Owner, &tiers, &raffle.IsOpen)
+	raffle.Tiers = []int32(tiers)
+	if err == sql.ErrNoRows {
+		err = nil // this is a non-error and simply means there was no matching raffle
+	}
+
+	return err
 }
 
 func GetRafflesFromList(tx *sql.Tx, object, parameter interface{}, query string) error {
+	user_id, t1 := parameter.(int)
+	raffles, t2 := object.(*[]Raffle)
+	if !(t1 && t2) {
+		return errors.New("Invalid parameters to GetRafflesFromList")
+	}
+
+	rows, err := tx.Query(query, user_id)
+	if err != nil {
+		return err
+	}
+
+	for rows.Next() {
+		var raffle Raffle
+		var tiers pq.Int32Array
+		err = rows.Scan(&raffle.Id, &raffle.Display, &raffle.Timestamp, &raffle.Owner, &tiers, &raffle.IsOpen)
+		if err != nil {
+			*raffles = nil
+			return err
+		}
+		raffle.Tiers = []int32(tiers)
+
+		*raffles = append(*raffles, raffle)
+	}
+
 	return nil
 }
 
