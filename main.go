@@ -549,6 +549,8 @@ function onReset(obj) {
 
 func main() {
 	fmt.Println("goraffe!")
+	settings := GetClientSettings()
+	store.Init(settings.DatabaseUrl)
 	http.HandleFunc(web.PATH_ABOUT, AboutPage)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	http.HandleFunc(web.PATH_DASHBOARD, RaffleDashboard)
