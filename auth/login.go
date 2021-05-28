@@ -1,17 +1,17 @@
 package auth
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"net/http"
-	"time"
-	"io"
-	"errors"
 	"crypto/aes"
-	"crypto/sha256"
+	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/rand"
-	"crypto/cipher"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"time"
 
 	"github.com/thewug/goraffe/patreon"
 )
