@@ -1,10 +1,10 @@
 package web
 
 import (
-	"net/http"
-	"html"
-	"strings"
 	"fmt"
+	"html"
+	"net/http"
+	"strings"
 
 	"github.com/thewug/goraffe/store"
 )
