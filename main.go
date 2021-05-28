@@ -552,6 +552,7 @@ function onReset(obj) {
 func main() {
 	fmt.Println("goraffe!")
 	settings := GetClientSettings()
+	store.Init(settings.DatabaseUrl)
 	auth.Init(settings.AESPasskey1, settings.AESPasskey2)
 	http.HandleFunc(web.PATH_ABOUT, AboutPage)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
