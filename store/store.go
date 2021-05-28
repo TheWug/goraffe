@@ -60,3 +60,24 @@ func (this *Raffle) Cancel() (bool, error) {
 func (this *Raffle) Draw() (*Entry, error) {
 	return nil, nil
 }
+
+func Transact(object interface{}, parameters interface{}, db_func func(*sql.Tx, interface{}, interface{}) error) (error) {
+	tx, err := connection.Begin()
+	if err != nil {
+		return err
+	}
+
+	err = db_func(tx, object, parameters)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
