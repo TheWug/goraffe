@@ -397,6 +397,156 @@ func ShowRaffle(w http.ResponseWriter, req *http.Request) {
 	rp.Close()
 }
 
+func Script(w http.ResponseWriter, req *http.Request) {
+	script := `
+window.onload = function() {
+	var conn
+
+	function process(e) {
+		obj = JSON.parse(e.data)
+		onUpdate(obj)
+	}
+
+	function connect() {
+		conn = new WebSocket("ws://" + document.location.host + "/ws/" + raffle_id)
+		conn.onclose = function(e) {
+			window.setTimeout(connect, 10000)
+		}
+		conn.onmessage = process
+	}
+
+	if (window["WebSocket"]) {
+		connect()
+	}
+
+	(document.getElementById('roundEnter') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"enter"}))
+	};
+
+	(document.getElementById('roundWithdraw') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"withdraw"}))
+	};
+
+	(document.getElementById('roundOpen') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"open"}))
+	};
+
+	(document.getElementById('roundClose') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"close"}))
+	};
+
+	(document.getElementById('roundCancel') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"cancel"}))
+	};
+
+	(document.getElementById('roundDraw') || {}).onclick = function() {
+		conn.send(JSON.stringify({"type":"draw"}))
+	};
+}
+
+function onUpdate(obj) {
+	console.log(obj.type)
+	switch (obj.type) {
+	case "enter":
+		onEnter(obj)
+		break
+	case "withdraw":
+		onWithdraw(obj)
+		break
+	case "disqualify":
+		onDisqualify(obj)
+		break
+	case "win":
+		onWin(obj)
+		break
+	case "lose":
+		onLose(obj)
+		break
+	case "open":
+		onOpen(obj)
+		break
+	case "close":
+		onClose(obj)
+		break
+	case "reset":
+		onReset(obj)
+		break
+	}
+}
+
+// Raffle Creator
+function selectTiers(n) {
+	let chosen = $(".tier#" + n)[0]
+	if (chosen.checked) {
+		for (let box of $(".tier")) {
+			box.checked = (box.name >= n)
+		}
+	}
+}
+
+function doDraw() {
+	alert("you rolled the raffle.")
+}
+
+function doOpen() {
+	alert("you opened the raffle for entries.")
+}
+
+function doEnter() {
+	alert("you entered your own raffle.")
+}
+
+function onStatus() {
+	alert("status changed.")
+}
+
+// Raffle Entrant
+function onEnter(obj) {
+	document.getElementById('entry-status').innerHTML = "You are entered into this drawing."
+}
+
+function onWithdraw(obj) {
+	document.getElementById('entry-status').innerHTML = ""
+}
+
+function onDisqualify(obj) {
+	document.getElementById('entry-status').innerHTML = "You have been disqualified from this drawing."
+}
+
+function onWin(obj) {
+	document.getElementById('victory').innerHTML = '<h2>YOU WON!</h2><iframe style="display: none;" width="560" height="315" src="https://www.youtube.com/embed/-YCN-a0NsNk?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><button onclick="onDismissWin()">Dismiss</button>'
+	onWithdraw(obj)
+	onClose(obj)
+}
+
+function onLose(obj) {
+	document.getElementById('victory').innerHTML = '<h2>Congratulations <b id="winner"></b>!</h2><br /><button onclick="onDismissWin()">Dismiss</button>'
+	document.getElementById('winner').innerText = obj.winner
+	onWithdraw(obj)
+	onClose(obj)
+}
+
+function onDismissWin() {
+	document.getElementById('victory').innerHTML = ""
+}
+
+function onOpen(obj) {
+	document.getElementById('raffle-status').innerHTML = "The raffle is open."
+}
+
+function onClose(obj) {
+	document.getElementById('raffle-status').innerHTML = "This raffle is not currently accepting new entries."
+}
+
+function onReset(obj) {
+	document.getElementById('raffle-status').innerHTML = "The raffle was reset. If you entered before, you must re-enter."
+	document.getElementById('entry-status').innerHTML = ""
+}
+`
+
+	w.Write([]byte(script))
+}
+
 func main() {
 	fmt.Println("goraffe!")
 	http.HandleFunc(web.PATH_ABOUT, AboutPage)
@@ -404,6 +554,7 @@ func main() {
 	http.HandleFunc(web.PATH_DASHBOARD, RaffleDashboard)
 	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
 	http.HandleFunc(web.PATH_ACCOUNT_LINKING, LinkAccountPatreonReturn)
+	http.HandleFunc(web.PATH_SCRIPT, Script)
 	err := http.ListenAndServe(":3001", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
