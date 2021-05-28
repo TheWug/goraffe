@@ -374,4 +374,39 @@ var upgrader = websocket.Upgrader{
 }
 
 func WebSocket(w http.ResponseWriter, req *http.Request) {
+	login := auth.Get(req)
+	if login == nil {
+		return
+	}
+
+	raffle_id := strings.TrimPrefix(req.URL.Path, fmt.Sprintf(PATH_WEBSOCKET, ""))
+	if raffle_id == "" {
+		return
+	}
+
+	user, err := patreon.GetUserInfo(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		RedirectLinkAccountAndReturn(w, req)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	hub := LookupRaffleHub(raffle_id)
+	if hub == nil {
+		return
+	}
+
+	conn, err := upgrader.Upgrade(w, req, nil)
+
+	client := Client{
+		Id: user.Id,
+		Name: user.FullName,
+		Conn: conn,
+		Outgoing: make(chan []byte, 32),
+	}
+
+	hub.Register <- &client
 }
