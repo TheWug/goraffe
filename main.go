@@ -18,6 +18,7 @@ import (
 	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
 	"github.com/thewug/goraffe/patreon"
+	"github.com/thewug/goraffe/store"
 )
 
 type ClientSettings struct {
