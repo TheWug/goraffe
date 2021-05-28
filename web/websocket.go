@@ -80,6 +80,33 @@ func (this *RaffleHub) Cancel() {
 func (this *RaffleHub) Draw() {
 }
 
+var all_hubs map[string]*RaffleHub = make(map[string]*RaffleHub)
+
+func LookupRaffleHub(raffle_id string) *RaffleHub {
+	if hub, ok := all_hubs[raffle_id]; ok && hub != nil {
+		return hub
+	}
+
+	var h RaffleHub
+	err := store.Transact(&h.Raffle, raffle_id, store.GetRaffle)
+	if err != nil {
+		return nil
+	}
+
+	h = RaffleHub{
+		Raffle: h.Raffle,
+		Clients: make(map[int][]*Client),
+		Register: make(chan *Client),
+		Unregister: make(chan *Client),
+		Actions: make(chan *Action),
+	}
+
+	go h.Run()
+
+	all_hubs[raffle_id] = &h
+	return &h
+}
+
 type Client struct {
 	Hub     *RaffleHub
 
