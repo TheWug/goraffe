@@ -95,6 +95,62 @@ func AboutPage(w http.ResponseWriter, req *http.Request) {
 	rp.Close()
 }
 
+func RaffleDashboard(w http.ResponseWriter, req *http.Request) {
+	templ := template.Must(template.New("dashboardpage").Parse(
+`<html></head><title>Dashboard</title></head><body>
+{{if ne (len .MyRaffles) 0}}<h1>Your Raffles</h1>{{end}}
+{{range .MyRaffles}}<a href="/r/{{.Id}}">{{.Display}}</a><br/>{{end}}
+<form action="/new" method="get"><input type="submit" value="Create a new raffle"></form><br/>
+{{if ne (len .EnteredRaffles) 0}}<h1>Raffles You've Entered Before</h1>{{end}}
+{{range .EnteredRaffles}}<a href="/r/{{.Id}}">{{.Display}}</a><br/>{{end}}
+</body></html>`,
+	))
+
+	login := auth.Get(req)
+	if login == nil {
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	}
+
+	user, err := patreon.GetUserInfo(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	var my_raffles, entered_raffles []store.Raffle
+	err = store.Transact(nil, nil, func(tx *sql.Tx, x, y interface{}) (error) {
+		err := store.GetMyRaffles(tx, &my_raffles, user.Id)
+		if err != nil {
+			return err
+		}
+		err = store.GetEnteredRaffles(tx, &entered_raffles, user.Id)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	args := map[string]interface{}{
+		"MyRaffles": my_raffles,
+		"EnteredRaffles": entered_raffles,
+	}
+
+	rp, wp := io.Pipe()
+	go templateWrite(wp, templ, args)
+
+	io.Copy(w, rp)
+	rp.Close()
+}
+
 func LinkAccountPatreonReturn(w http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
 	var state auth.PatreonState
