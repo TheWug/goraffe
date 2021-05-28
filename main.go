@@ -551,6 +551,7 @@ func main() {
 	fmt.Println("goraffe!")
 	settings := GetClientSettings()
 	store.Init(settings.DatabaseUrl)
+	http.HandleFunc(web.PATH_ABOUT, AboutPage)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
 	http.HandleFunc(web.PATH_ACCOUNT_LINKING, LinkAccountPatreonReturn)
