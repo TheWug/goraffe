@@ -29,3 +29,8 @@ func RedirectLinkAccountAndReturn(w http.ResponseWriter, req *http.Request) {
 	new_url := fmt.Sprintf("%s?returnto=%s", PATH_LINK_ACCOUNT, html.EscapeString(return_to))
 	http.Redirect(w, req, new_url, 303)
 }
+
+func RedirectToRaffle(w http.ResponseWriter, req *http.Request, raffle *store.Raffle) {
+	new_url := fmt.Sprintf(PATH_RAFFLE, html.EscapeString(raffle.Id))
+	http.Redirect(w, req, new_url, 303)
+}
