@@ -20,6 +20,7 @@ type ClientSettings struct {
 	PatreonApiClientId     string `json:"patreon_api_client_id"`
 	PatreonApiClientSecret string `json:"patreon_api_client_secret"`
 	PatreonLoginRedirect   string `json:"patreon_login_redirect"`
+	DatabaseUrl            string `json:"database_url"`
 }
 
 func GetClientSettings() ClientSettings {
