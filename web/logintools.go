@@ -14,6 +14,7 @@ const (
 	PATH_ACCOUNT_LINKING = "/patreon_return"
 	PATH_NEW_RAFFLE      = "/new"
 	PATH_RAFFLE          = "/r/%s"
+	PATH_WEBSOCKET       = "/ws/%s"
 )
 
 func RedirectLinkAccountAndReturn(w http.ResponseWriter, req *http.Request) {
