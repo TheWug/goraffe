@@ -117,3 +117,15 @@ type Client struct {
 
 	Outgoing chan []byte
 }
+
+const (
+	maxMessageSize = 340
+	writeWait = 10 * time.Second
+	pongWait = 300 * time.Second
+	pingPeriod = (pongWait * 9) / 10
+)
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
