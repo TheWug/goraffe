@@ -234,6 +234,25 @@ func (this *Raffle) Draw() (*Entry, error) {
 
 	return winner, nil
 }
+
+func CreateRaffle(owner int, name string, tiers []int32) (*Raffle, error) {
+	return nil, nil
+}
+
+func GetRaffle(tx *sql.Tx, object interface{}, parameter interface{}) error {
+	return nil
+}
+
+func GetRafflesFromList(tx *sql.Tx, object, parameter interface{}, query string) error {
+	return nil
+}
+
+func GetMyRaffles(tx *sql.Tx, object interface{}, parameter interface{}) error {
+	return GetRafflesFromList(tx, object, parameter, "select id, display, ts, owner, tiers, open from raffles where owner = $1 order by ts asc")
+}
+
+func GetEnteredRaffles(tx *sql.Tx, object interface{}, parameter interface{}) error {
+	return GetRafflesFromList(tx, object, parameter, "select raffles.id, raffles.display, raffles.ts, raffles.owner, raffles.tiers, raffles.open from raffles inner join entries using (id) where user_id = $1 order by ts asc")
 }
 
 func Transact(object interface{}, parameters interface{}, db_func func(*sql.Tx, interface{}, interface{}) error) (error) {
