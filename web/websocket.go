@@ -152,15 +152,41 @@ func (this *RaffleHub) Run() {
 }
 
 func (this *RaffleHub) SendTo(client *Client, data []byte) {
+	client.Outgoing <- data
 }
 
 func (this *RaffleHub) TargetedBroadcast(to_id int, status, master_status interface{}) {
+	st, _ := json.Marshal(status)
+	mst, _ := json.Marshal(master_status)
+
+	for _, c := range this.Clients[to_id] {
+		this.SendTo(c, st)
+	}
+	for _, c := range this.Masters {
+		this.SendTo(c, mst)
+	}
 }
 
 func (this *RaffleHub) Broadcast(mode string) {
+	st, _ := json.Marshal(Status{Type: mode})
+
+	for _, v := range this.Clients {
+		for _, c := range v {
+			this.SendTo(c, st)
+		}
+	}
 }
 
 func (this *RaffleHub) TargetedGeneric(client *Client, fn func(int, string) (bool, error), mode string) {
+	changed, err := fn(client.Id, client.Name)
+	if err != nil {
+		// XXX log error
+		return
+	} else if !changed {
+		return
+	} else {
+		this.TargetedBroadcast(client.Id, Status{Type: mode}, MasterStatus{Type: "notify-" + mode, Id: client.Id, Name: client.Name})
+	}
 }
 
 func (this *RaffleHub) Enter(client *Client) {
@@ -176,6 +202,15 @@ func (this *RaffleHub) Undisqualify(client *Client, to_undq int) {
 }
 
 func (this *RaffleHub) Generic(fn func() (bool, error), mode string) {
+	changed, err := fn()
+	if err != nil {
+		// XXX log error
+		return
+	} else if !changed {
+		return
+	} else {
+		this.Broadcast(mode)
+	}
 }
 
 func (this *RaffleHub) Open() {
