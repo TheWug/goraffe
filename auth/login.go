@@ -145,7 +145,6 @@ func Get(req *http.Request) *Session {
 	// fetch the session cookie and bail if it's unset.
 	session_blob, err := req.Cookie(sessionCookieName)
 	if err != nil {
-		fmt.Println("no cookie at all")
 		return nil
 	}
 
@@ -153,14 +152,12 @@ func Get(req *http.Request) *Session {
 	var session Session
 	err = DecryptAndValidate(session_blob.Value, &session)
 	if err != nil {
-		fmt.Println("cookie decrypted badly: ", err.Error())
 		// XXX log this error as it is likely either developer error or evidence of abuse
 		return nil
 	}
 
 	// check if session has expired and bail if so
 	if time.Now().Sub(session.SessionDate) > one_week {
-		fmt.Println("cookie is expired")
 		return nil
 	}
 
@@ -171,7 +168,6 @@ func Put(w http.ResponseWriter, s *Session) {
 	s.Update()
 	value, err := EncryptAndSign(*s)
 	if err != nil {
-		fmt.Println("Error: ", err.Error())
 		// XXX log this
 		return
 	}
