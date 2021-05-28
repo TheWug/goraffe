@@ -243,6 +243,42 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 	rp.Close()
 }
 
+func NewRafflePost(w http.ResponseWriter, req *http.Request) {
+	login := auth.Get(req)
+	if login == nil {
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	}
+
+	var tiers []int32
+	req.ParseForm()
+	for k, _ := range req.PostForm {
+		if i, e := strconv.Atoi(k); e == nil {
+			tiers = append(tiers, int32(i))
+		}
+	}
+
+	name := req.PostFormValue("raffle_name")
+
+	user, err := patreon.GetUserInfo(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	raffle, err := store.CreateRaffle(user.Id, name, tiers)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	web.RedirectToRaffle(w, req, raffle)
+}
+
 func main() {
 	fmt.Println("goraffe!")
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
