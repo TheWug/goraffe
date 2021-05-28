@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"sort"
+	"database/sql"
 
 	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
