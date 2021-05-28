@@ -78,6 +78,57 @@ func (p *PatreonSession) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
-func GetCampaignTiers(p *PatreonSession) (TierArray, error) {
-	return TierArray{}, nil
+func GetTitleAndTiers(p *PatreonSession) (string, TierArray, error) {
+	req, err := http.NewRequest("GET", "https://www.patreon.com/api/oauth2/v2/identity?include=campaign,campaign.tiers&fields%5Btier%5D=title,amount_cents&fields%5Buser%5D=full_name", nil)
+	if err != nil {
+		return "", nil, err
+	}
+
+	req.Header.Add("authorization", fmt.Sprintf("Bearer %s", p.AccessToken))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", nil, err
+	}
+
+	data := map[string]interface{}{}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return "", nil, err
+	}
+	jq := jsonq.NewQuery(data)
+	v, err := jq.Interface("errors")
+	if v != nil {
+		return "", nil, errors.New("API call failed")
+	}
+
+	var vanity string
+	var ta TierArray
+
+	vanity, err = jq.String("data", "attributes", "full_name")
+	if err != nil {
+		return "", nil, err
+	}
+
+	included, err := jq.ArrayOfObjects("included")
+	if err == nil {
+		lc := func(s string, e error) string { return strings.ToLower(s) }
+		for _, object := range included {
+			jq2 := jsonq.NewQuery(object)
+			if lc(jq2.String("type")) == "tier" {
+				title, err := jq2.String("attributes", "title")
+				if err != nil {
+					return "", nil, err
+				}
+				amount, err := jq2.Int("attributes", "amount_cents")
+				if err != nil {
+					return "", nil, err
+				}
+				ta = append(ta, Tier{
+					ContributionCents: amount,
+					Name: title,
+				})
+			}
+		}
+	}
+	return vanity, ta, nil
 }
