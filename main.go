@@ -311,6 +311,92 @@ func NewRafflePost(w http.ResponseWriter, req *http.Request) {
 	web.RedirectToRaffle(w, req, raffle)
 }
 
+func ShowRaffle(w http.ResponseWriter, req *http.Request) {
+	templ_campaign := template.Must(template.New("rafflepagecampaign").Parse(
+`<html><head>
+<title>Raffle Control Panel</title>
+<script>var raffle_id = "{{.RaffleId}}"</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="/raffle.js"></script>
+</head><body>
+<a href="/dashboard">My Dashboard</a></br>
+<h1>{{.Title}}</h1>
+<button id="roundOpen">Open raffle for entries!</button>
+<button id="roundClose">Close raffle for entries!</button>
+<button id="roundCancel">Cancel this round!</button>
+<button id="roundDraw">Draw this round!</button>
+<br />
+<button id="roundEnter">Enter your own raffle!</button>
+<button id="roundWithdraw">Withdraw from your own raffle!</button>
+<div id=userlist></div>
+<div id=statusbox>
+<label id=raffle-status></label><br/>
+<label id=entry-status></label><br/><br/>
+<div id=victory></div>
+</div>
+</body></html>
+`,
+	))
+
+	templ_user := template.Must(template.New("rafflepageuser").Parse(
+`<html><head>
+<title>{{.Title}}</title>
+<script>var raffle_id = "{{.RaffleId}}"</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="/raffle.js"></script>
+</head><body>
+<a href="/dashboard">My Dashboard</a></br>
+<h1>{{.Title}}</h1>
+<button id="roundEnter">Enter the raffle!</button>
+<button id="roundWithdraw">Withdraw from the raffle!</button>
+<div id=statusbox>
+<label id=raffle-status></label><br/>
+<label id=entry-status></label><br/><br/>
+<div id=victory></div>
+</div>
+</body></html>
+`,
+	))
+
+	login := auth.Get(req)
+	if login == nil {
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	}
+
+	user, err := patreon.GetUserInfo(&login.Patreon)
+	if err == patreon.BadLogin {
+		auth.Delete(w)
+		web.RedirectLinkAccountAndReturn(w, req)
+		return
+	} else if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	raffle_id := strings.TrimPrefix(req.URL.Path, "/r/")
+	var raffle store.Raffle
+	err = store.Transact(&raffle, raffle_id, store.GetRaffle)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	rp, wp := io.Pipe()
+	args := map[string]interface{} {
+		"Title": raffle.Display,
+		"RaffleId": raffle_id,
+	}
+	if raffle.Owner == user.Id {
+		go templateWrite(wp, templ_campaign, args)
+	} else {
+		go templateWrite(wp, templ_user, args)
+	}
+
+	io.Copy(w, rp) // XXX listen for errors
+	rp.Close()
+}
+
 func main() {
 	fmt.Println("goraffe!")
 	http.HandleFunc(web.PATH_ABOUT, AboutPage)
