@@ -1,6 +1,8 @@
 package web
 
 import (
+	"github.com/gorilla/websocket"
+
 	"github.com/thewug/goraffe/store"
 )
 
@@ -37,4 +39,12 @@ type MasterStatus struct {
 }
 
 type Client struct {
+	Hub     *RaffleHub
+
+	Id       int
+	Name     string
+
+	Conn    *websocket.Conn
+
+	Outgoing chan []byte
 }
