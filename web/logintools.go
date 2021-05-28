@@ -15,6 +15,7 @@ const (
 	PATH_NEW_RAFFLE      = "/new"
 	PATH_RAFFLE          = "/r/%s"
 	PATH_WEBSOCKET       = "/ws/%s"
+	PATH_DASHBOARD       = "/dashboard"
 )
 
 func RedirectLinkAccountAndReturn(w http.ResponseWriter, req *http.Request) {
