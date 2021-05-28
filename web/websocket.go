@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/gorilla/websocket"
 
 	"github.com/thewug/goraffe/store"
