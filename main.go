@@ -257,15 +257,19 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = title
-
 	tiers = append(tiers, patreon.Tier{Name: "Everyone (including non-patrons)", ContributionCents:0})
 	sort.Slice(tiers, func(x, y int) bool {
 		return tiers[x].ContributionCents < tiers[y].ContributionCents
 	})
 
 	rp, wp := io.Pipe()
-	go templateWrite(wp, templ, nil)
+	go templateWrite(wp, templ, map[string]interface{} {
+		"Title": title,
+		"Tiers": tiers,
+		"Format": func(i int) string {
+			return fmt.Sprintf("$%d.%02d", i/100, i%100)
+		},
+	})
 
 	auth.Put(w, login)
 	io.Copy(w, rp) // XXX listen for errors
