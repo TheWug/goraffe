@@ -2,6 +2,7 @@ package store
 
 import (
 	"time"
+	"errors"
 	"database/sql"
 )
 
