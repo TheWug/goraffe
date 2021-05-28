@@ -11,6 +11,7 @@ import (
 	"html/template"
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 
 	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
