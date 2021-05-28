@@ -561,6 +561,7 @@ func main() {
 	http.HandleFunc(web.PATH_ACCOUNT_LINKING, LinkAccountPatreonReturn)
 	http.HandleFunc(fmt.Sprintf(web.PATH_RAFFLE, ""), ShowRaffle)
 	http.HandleFunc(web.PATH_SCRIPT, Script)
+	http.HandleFunc(fmt.Sprintf(web.PATH_WEBSOCKET, ""), web.WebSocket)
 	err := http.ListenAndServe(":3001", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
