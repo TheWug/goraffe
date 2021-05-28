@@ -271,7 +271,6 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		},
 	})
 
-	auth.Put(w, login)
 	io.Copy(w, rp) // XXX listen for errors
 	rp.Close()
 }
