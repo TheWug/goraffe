@@ -17,12 +17,28 @@ func Init(dburl string) error {
 }
 
 type Raffle struct {
+	Id        string
+	Display   string
+	Owner     int
+	Tiers   []int32
+	Timestamp int64
+	IsOpen    bool
 }
 
 type Entry struct {
+	RaffleId     string
+	UserId       int
+	Entered      bool
+	Disqualified bool
+	Name         string
 }
 
 type Score struct {
+	RaffleId      string
+	UserId        int
+	Name          string
+	Score         float64
+	LifetimeScore float64
 }
 
 func (this *Raffle) Status(user_id int) (*Entry, error) {
