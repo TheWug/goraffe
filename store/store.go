@@ -4,6 +4,7 @@ import (
 	"time"
 	"errors"
 	"database/sql"
+	"github.com/lib/pq"
 )
 
 var connection *sql.DB
