@@ -1,9 +1,14 @@
 package patreon
 
 import (
+	"net/http"
+	"fmt"
+	"strings"
 	"time"
 	"errors"
 	"encoding/json"
+
+	"github.com/jmoiron/jsonq"
 )
 
 var BadLogin error = errors.New("Invalid or expired patreon auth token")
@@ -77,6 +82,59 @@ type PatreonUser struct {
 	Id int
 	FullName string
 	CampaignId int
+}
+
+func GetUserInfo(p *PatreonSession) (*PatreonUser, error) {
+	var pu PatreonUser
+	req, err := http.NewRequest("GET", "https://www.patreon.com/api/oauth2/v2/identity?include=campaign&fields%5Buser%5D=full_name", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("authorization", fmt.Sprintf("Bearer %s", p.AccessToken))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	data := map[string]interface{}{}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	jq := jsonq.NewQuery(data)
+	v, err := jq.Interface("errors")
+	if v != nil {
+		return nil, errors.New("API call failed")
+	}
+
+	included, err := jq.ArrayOfObjects("included")
+	if err != nil {
+		// if the user has no campaign, this response won't have an included key
+		pu.CampaignId = -1
+	} else {
+		lc := func(s string, e error) string { return strings.ToLower(s) }
+		for _, object := range included {
+			jq2 := jsonq.NewQuery(object)
+			if lc(jq2.String("type")) == "campaign" {
+				pu.CampaignId, err = jq2.Int("id")
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
+
+	pu.Id, err = jq.Int("data", "id")
+	if err != nil {
+		return nil, err
+	}
+	pu.FullName, err = jq.String("data", "attributes", "full_name")
+	if err != nil {
+		return nil, err
+	}
+
+	return &pu, nil
 }
 
 func GetCampaignTiers(p *PatreonSession) (TierArray, error) {
