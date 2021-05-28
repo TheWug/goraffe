@@ -249,7 +249,7 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tiers, err := patreon.GetCampaignTiers(&login.Patreon)
+	title, tiers, err := patreon.GetTitleAndTiers(&login.Patreon)
 	if err == patreon.BadLogin {
 		auth.Delete(w)
 		web.RedirectLinkAccountAndReturn(w, req)
@@ -258,6 +258,8 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), 500)
 		return
 	}
+
+	_ = title
 
 	tiers = append(tiers, patreon.Tier{Name: "Everyone (including non-patrons)", ContributionCents:0})
 	sort.Slice(tiers, func(x, y int) bool {
