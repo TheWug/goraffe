@@ -5,6 +5,7 @@ import (
 	"errors"
 	"database/sql"
 	"github.com/lib/pq"
+	"github.com/google/uuid"
 )
 
 var connection *sql.DB
