@@ -17,15 +17,23 @@ type RaffleHub struct {
 }
 
 type Action struct {
+	J []byte
+	Client *Client
 }
 
 type Status struct {
+	Type string `json:"type"`
 }
 
 type Lose struct {
+	Type string `json:"type"`
+	Winner string `json:"winner"`
 }
 
 type MasterStatus struct {
+	Type string `json:"type"`
+	Id   int    `json:"id"`
+	Name string `json:"name,omitempty"`
 }
 
 type Client struct {
