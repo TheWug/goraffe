@@ -251,6 +251,9 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		auth.Delete(w)
 		web.RedirectLinkAccountAndReturn(w, req)
 		return
+	} else if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
 	}
 
 	_ = tiers
