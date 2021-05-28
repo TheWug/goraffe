@@ -75,6 +75,23 @@ func LinkAccount(w http.ResponseWriter, req *http.Request) {
 	rp.Close()
 }
 
+func AboutPage(w http.ResponseWriter, req *http.Request) {
+	templ := template.Must(template.New("aboutpage").Parse(
+`<html></head><title>About Goraffe</title></head><body>
+<h1>About Goraffe</h1>
+<p>Patreon doesn't allow raffles, because it is considered a form of gambling. But that makes it difficult to distribute a limited quantity reward among a tier with more people than it can easily be divided between.</p>
+<p>And that's where Goraffe comes in: Goraffe (pronounced like "giraffe") is a raffle-like system, designed to be compatible with Patreon's rules surrounding raffles. The key difference, and the reason Goraffe is allowed on Patreon while true raffles are not, is that with a true raffle, the winning draw is completely random.  Goraffe uses a deterministic probability model with the same long-term outcomes as a true raffle, but in the short term, wins are divided fairly amongst everyone who participates.</p>
+<p>It has the same look-and-feel as a true raffle, and there is still a bit of luck to it, so hopefully it's still fun.</p>
+</body></html>`,
+))
+
+	rp, wp := io.Pipe()
+	go templateWrite(wp, templ, nil)
+
+	io.Copy(w, rp)
+	rp.Close()
+}
+
 func LinkAccountPatreonReturn(w http.ResponseWriter, req *http.Request) {
 	q := req.URL.Query()
 	var state auth.PatreonState
@@ -173,6 +190,7 @@ func main() {
 	fmt.Println("goraffe!")
 	settings := GetClientSettings()
 	auth.Init(settings.AESPasskey1, settings.AESPasskey2)
+	http.HandleFunc(web.PATH_ABOUT, AboutPage)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
 	http.HandleFunc(web.PATH_ACCOUNT_LINKING, LinkAccountPatreonReturn)
