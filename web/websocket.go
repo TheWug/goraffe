@@ -320,9 +320,56 @@ const (
 )
 
 func (this *Client) readPump() {
+	defer func() {
+		this.Hub.Unregister <- this
+		this.Conn.Close()
+	}()
+	this.Conn.SetReadLimit(maxMessageSize)
+	this.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	this.Conn.SetPongHandler(func(string) error { this.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	for {
+		_, message, err := this.Conn.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+			}
+			break
+		}
+		this.Hub.Actions <- &Action{J: message, Client: this}
+	}
 }
 
 func (this *Client) writePump() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		this.Conn.Close()
+	}()
+	for {
+		select {
+		case message, ok := <- this.Outgoing:
+			this.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				// The hub closed the channel.
+				this.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+
+			w, err := this.Conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				return
+			}
+			w.Write(message)
+
+			if err := w.Close(); err != nil {
+				return
+			}
+		case <-ticker.C:
+			this.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := this.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}
 }
 
 var upgrader = websocket.Upgrader{
