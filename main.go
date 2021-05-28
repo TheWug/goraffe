@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strconv"
 	"strings"
 	"fmt"
@@ -258,7 +259,10 @@ func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_ = tiers
+	tiers = append(tiers, patreon.Tier{Name: "Everyone (including non-patrons)", ContributionCents:0})
+	sort.Slice(tiers, func(x, y int) bool {
+		return tiers[x].ContributionCents < tiers[y].ContributionCents
+	})
 
 	rp, wp := io.Pipe()
 	go templateWrite(wp, templ, nil)
