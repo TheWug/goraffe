@@ -4,6 +4,7 @@ import (
 	"time"
 	"errors"
 	"encoding/json"
+	"net/http"
 )
 
 var BadLogin error = errors.New("Invalid or expired patreon auth token")
