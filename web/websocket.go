@@ -190,15 +190,35 @@ func (this *RaffleHub) TargetedGeneric(client *Client, fn func(int, string) (boo
 }
 
 func (this *RaffleHub) Enter(client *Client) {
+	this.TargetedGeneric(client, this.Raffle.Enter, "enter")
 }
 
 func (this *RaffleHub) Withdraw(client *Client) {
+	this.TargetedGeneric(client, this.Raffle.Withdraw, "withdraw")
 }
 
 func (this *RaffleHub) Disqualify(client *Client, to_dq int) {
+	changed, err := this.Raffle.Disqualify(to_dq)
+	if err != nil {
+		// XXX log error
+		return
+	} else if !changed {
+		return
+	} else {
+		this.TargetedBroadcast(client.Id, Status{Type: "disqualify"}, MasterStatus{Type: "notify-disqualify", Id: to_dq})
+	}
 }
 
 func (this *RaffleHub) Undisqualify(client *Client, to_undq int) {
+	entry, err := this.Raffle.Undisqualify(to_undq)
+	if err != nil {
+		// XXX log error
+		return
+	} else if entry.Entered {
+		this.TargetedBroadcast(client.Id, Status{Type: "enter"}, MasterStatus{Type: "notify-enter", Id: to_undq, Name: entry.Name})
+	} else {
+		this.TargetedBroadcast(client.Id, Status{Type: "withdraw"}, MasterStatus{Type: "notify-withdraw", Id: to_undq, Name: entry.Name})
+	}
 }
 
 func (this *RaffleHub) Generic(fn func() (bool, error), mode string) {
