@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 	"fmt"
 	"log"
 	"io"
@@ -210,37 +211,15 @@ func LinkAccountPatreonReturn(w http.ResponseWriter, req *http.Request) {
 }
 
 func NewRaffle(w http.ResponseWriter, req *http.Request) {
-	templ := template.Must(template.New("newrafflepage").Parse(
-`<html><head><title>New Raffle</title></head><body>
-<p>Create a new raffle here.</p>
-<form action="#">
-<input>
-</body></html>`,
-))
-
-	login := auth.Get(req)
-	if login == nil {
-		web.RedirectLinkAccountAndReturn(w, req)
+	m := strings.ToUpper(req.Method)
+	if m == "GET" {
+		NewRaffleGet(w, req)
+	} else if m == "POST" {
+		NewRafflePost(w, req)
+	} else {
+		http.Error(w, "Invalid method", 400)
 		return
 	}
-
-	tiers, err := patreon.GetCampaignTiers(&login.Patreon)
-	if err == patreon.BadLogin {
-		auth.Delete(w)
-		web.RedirectLinkAccountAndReturn(w, req)
-		return
-	}
-	
-	_ = tiers
-
-	_ = tiers
-
-	rp, wp := io.Pipe()
-	go templateWrite(wp, templ, nil)
-
-	auth.Put(w, login)
-	io.Copy(w, rp) // XXX listen for errors
-	rp.Close()
 }
 
 func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
