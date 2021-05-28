@@ -78,6 +78,12 @@ func (p *PatreonSession) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
+type PatreonUser struct {
+	Id int
+	FullName string
+	CampaignId int
+}
+
 func GetTitleAndTiers(p *PatreonSession) (string, TierArray, error) {
 	req, err := http.NewRequest("GET", "https://www.patreon.com/api/oauth2/v2/identity?include=campaign,campaign.tiers&fields%5Btier%5D=title,amount_cents&fields%5Buser%5D=full_name", nil)
 	if err != nil {
