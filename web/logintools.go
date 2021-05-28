@@ -12,6 +12,7 @@ const (
 	PATH_ACCOUNT_LINKING = "/patreon_return"
 	PATH_NEW_RAFFLE      = "/new"
 	PATH_RAFFLE          = "/r/"
+	PATH_DASHBOARD       = "/dashboard"
 	PATH_ABOUT           = "/about"
 )
 
