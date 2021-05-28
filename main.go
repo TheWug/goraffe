@@ -20,6 +20,7 @@ type ClientSettings struct {
 	PatreonApiClientId     string `json:"patreon_api_client_id"`
 	PatreonApiClientSecret string `json:"patreon_api_client_secret"`
 	PatreonLoginRedirect   string `json:"patreon_login_redirect"`
+	DatabaseUrl            string `json:"database_url"`
 	AESPasskey1            string `json:"aes_passkey_1"`
 	AESPasskey2            string `json:"aes_passkey_2"`
 }
