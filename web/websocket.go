@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/thewug/goraffe/auth"
+	"github.com/thewug/goraffe/patreon"
 	"github.com/thewug/goraffe/store"
 )
 
