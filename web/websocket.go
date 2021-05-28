@@ -3,6 +3,7 @@ package web
 import (
 	"time"
 	"net/http"
+	"encoding/json"
 
 	"github.com/gorilla/websocket"
 
@@ -42,6 +43,116 @@ type MasterStatus struct {
 }
 
 func (this *RaffleHub) Run() {
+	for {
+	select {
+	case c := <- this.Register:
+		c.Hub = this
+		this.Clients[c.Id] = append(this.Clients[c.Id], c)
+		if c.Id == this.Raffle.Owner {
+			this.Masters = append(this.Masters, c)
+		}
+
+		go c.readPump()
+		go c.writePump()
+		entry, err := this.Raffle.Status(c.Id)
+		if err != nil {
+			// XXX log
+		}
+		if entry == nil {
+		} else if entry.Disqualified {
+			b, _ := json.Marshal(Status{Type: "disqualify"})
+			c.Outgoing <- b
+		} else if entry.Entered {
+			b, _ := json.Marshal(Status{Type: "enter"})
+			c.Outgoing <- b
+		} else {
+			b, _ := json.Marshal(Status{Type: "withdraw"})
+			c.Outgoing <- b
+		}
+
+		if this.Raffle.IsOpen {
+			b, _ := json.Marshal(Status{Type: "open"})
+			c.Outgoing <- b
+		} else {
+			b, _ := json.Marshal(Status{Type: "close"})
+			c.Outgoing <- b
+		}
+	case c := <- this.Unregister:
+		list, ok := this.Clients[c.Id]
+		if ok {
+			for i, v := range list {
+				if c == v {
+					list[i] = list[len(list) - 1]
+					if len(list) > 1 {
+						this.Clients[c.Id] = list[:len(list) - 1]
+					} else {
+						delete(this.Clients, c.Id)
+					}
+					break
+				}
+			}
+		}
+		for i, v := range this.Masters {
+			if c == v {
+				this.Masters[i] = this.Masters[len(list) - 1]
+				this.Masters = this.Masters[:len(list) - 1]
+				break
+			}
+		}
+		close(c.Outgoing)
+		c.Hub = nil
+	case a := <- this.Actions:
+		var s Status
+		err := json.Unmarshal(a.J, &s)
+		if err != nil {
+			break // XXX log
+		}
+
+		type DQ struct {
+			Type string
+			TargetId int
+		}
+
+		switch s.Type {
+		case "enter":
+			if this.Raffle.IsOpen {
+				this.Enter(a.Client)
+			}
+		case "withdraw":
+			if this.Raffle.IsOpen {
+				this.Withdraw(a.Client)
+			}
+		default: // all other cases require raffle ownership
+			if a.Client.Id != this.Raffle.Owner {
+				break
+			}
+			switch s.Type {
+			case "disqualify":
+				var dq DQ
+				err := json.Unmarshal(a.J, &dq)
+				if err != nil {
+					break // XXX log
+				}
+				this.Disqualify(a.Client, dq.TargetId)
+			case "undisqualify":
+				var dq DQ
+				err := json.Unmarshal(a.J, &dq)
+				if err != nil {
+					break // XXX log
+				}
+				this.Undisqualify(a.Client, dq.TargetId)
+			case "open":
+				this.Open()
+			case "close":
+				this.Close()
+			case "cancel":
+				this.Cancel()
+			case "draw":
+				this.Draw()
+			}
+		}
+	} // select
+	} // for
 }
 
 func (this *RaffleHub) SendTo(client *Client, data []byte) {
