@@ -15,3 +15,12 @@ func Init(dburl string) error {
 	connection = c
 	return nil
 }
+
+type Raffle struct {
+}
+
+type Entry struct {
+}
+
+type Score struct {
+}
