@@ -1,24 +1,24 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"html/template"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
-	"fmt"
-	"log"
-	"io"
-	"net/http"
-	"net/url"
 	"time"
-	"html/template"
-	"encoding/json"
-	"io/ioutil"
-	"database/sql"
 
-	"github.com/thewug/goraffe/web"
 	"github.com/thewug/goraffe/auth"
 	"github.com/thewug/goraffe/patreon"
 	"github.com/thewug/goraffe/store"
+	"github.com/thewug/goraffe/web"
 )
 
 type ClientSettings struct {
