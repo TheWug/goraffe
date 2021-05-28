@@ -13,7 +13,7 @@ const (
 	PATH_LINK_ACCOUNT    = "/patreon_login"
 	PATH_ACCOUNT_LINKING = "/patreon_return"
 	PATH_NEW_RAFFLE      = "/new"
-	PATH_RAFFLE          = "/r/"
+	PATH_RAFFLE          = "/r/%s"
 	PATH_DASHBOARD       = "/dashboard"
 	PATH_ABOUT           = "/about"
 	PATH_SCRIPT          = "/raffle.js"
