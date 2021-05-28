@@ -1,12 +1,12 @@
 package patreon
 
 import (
-	"net/http"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
-	"errors"
-	"encoding/json"
 
 	"github.com/jmoiron/jsonq"
 )
