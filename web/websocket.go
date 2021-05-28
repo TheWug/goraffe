@@ -238,15 +238,40 @@ func (this *RaffleHub) Generic(fn func() (bool, error), mode string) {
 }
 
 func (this *RaffleHub) Open() {
+	this.Generic(this.Raffle.Open, "open")
 }
 
 func (this *RaffleHub) Close() {
+	this.Generic(this.Raffle.Close, "close")
 }
 
 func (this *RaffleHub) Cancel() {
+	this.Generic(this.Raffle.Cancel, "reset")
 }
 
 func (this *RaffleHub) Draw() {
+	winner, err := this.Raffle.Draw()
+	if err != nil {
+		// XXX log error
+		return
+	} else if winner == nil {
+		return
+	}
+
+	win, _ := json.Marshal(Status{Type: "win"})
+	lose, _ := json.Marshal(Lose{Type: "lose", Winner: winner.Name})
+
+	for k, v := range this.Clients {
+		if k == winner.UserId {
+			for _, c := range v {
+				this.SendTo(c, win)
+			}
+		} else {
+			for _, c := range v {
+				this.SendTo(c, lose)
+			}
+		}
+	}
 }
 
 var all_hubs map[string]*RaffleHub = make(map[string]*RaffleHub)
