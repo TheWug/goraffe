@@ -38,6 +38,48 @@ type MasterStatus struct {
 	Name string `json:"name,omitempty"`
 }
 
+func (this *RaffleHub) Run() {
+}
+
+func (this *RaffleHub) SendTo(client *Client, data []byte) {
+}
+
+func (this *RaffleHub) TargetedBroadcast(to_id int, status, master_status interface{}) {
+}
+
+func (this *RaffleHub) Broadcast(mode string) {
+}
+
+func (this *RaffleHub) TargetedGeneric(client *Client, fn func(int, string) (bool, error), mode string) {
+}
+
+func (this *RaffleHub) Enter(client *Client) {
+}
+
+func (this *RaffleHub) Withdraw(client *Client) {
+}
+
+func (this *RaffleHub) Disqualify(client *Client, to_dq int) {
+}
+
+func (this *RaffleHub) Undisqualify(client *Client, to_undq int) {
+}
+
+func (this *RaffleHub) Generic(fn func() (bool, error), mode string) {
+}
+
+func (this *RaffleHub) Open() {
+}
+
+func (this *RaffleHub) Close() {
+}
+
+func (this *RaffleHub) Cancel() {
+}
+
+func (this *RaffleHub) Draw() {
+}
+
 var all_hubs map[string]*RaffleHub = make(map[string]*RaffleHub)
 
 func LookupRaffleHub(raffle_id string) *RaffleHub {
