@@ -1,11 +1,12 @@
 package store
 
 import (
+	"database/sql"
 	"errors"
 	"time"
-	"database/sql"
-	"github.com/lib/pq"
+	
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 var connection *sql.DB
