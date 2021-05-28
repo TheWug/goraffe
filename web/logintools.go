@@ -17,6 +17,7 @@ const (
 	PATH_WEBSOCKET       = "/ws/%s"
 	PATH_DASHBOARD       = "/dashboard"
 	PATH_ABOUT           = "/about"
+	PATH_SCRIPT          = "/raffle.js"
 )
 
 func RedirectLinkAccountAndReturn(w http.ResponseWriter, req *http.Request) {
