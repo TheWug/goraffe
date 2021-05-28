@@ -188,12 +188,10 @@ func LinkAccountPatreonReturn(w http.ResponseWriter, req *http.Request) {
 
 	err = json.Unmarshal(b, &s.Patreon)
 	if err != nil {
-		fmt.Println(err.Error())
 		http.Error(w, "Bad response from patreon 3", 502)
 		return
 	}
 
-	log.Println(string(b))
 	s.SessionDate = time.Now()
 
 	auth.Put(w, &s)
