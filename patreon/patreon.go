@@ -73,6 +73,12 @@ func (p *PatreonSession) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
+type PatreonUser struct {
+	Id int
+	FullName string
+	CampaignId int
+}
+
 func GetCampaignTiers(p *PatreonSession) (TierArray, error) {
 	return TierArray{}, nil
 }
