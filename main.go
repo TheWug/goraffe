@@ -225,12 +225,21 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 
 func NewRaffleGet(w http.ResponseWriter, req *http.Request) {
 	templ := template.Must(template.New("newrafflepage").Parse(
-`<html><head><title>New Raffle</title></head><body>
-<p>Create a new raffle here.</p>
-<form action="#">
-<input>
+`<html><head>
+<title>New Raffle</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="/raffle.js"></script>
+</head><body>
+<p>Welcome {{.Title}}!<br>Create a new raffle here.</p>
+<form action="#" method="post">
+<label>Which patron tiers should be allowed to enter the raffle?</label><br />
+{{range .Tiers}}<input onclick="selectTiers({{.ContributionCents}})" class="tier" type="checkbox" id="{{.ContributionCents}}" name="{{.ContributionCents}}" {{if eq .ContributionCents 0}}un{{end}}checked>
+<label for="{{.ContributionCents}}">{{.Name}}{{if ne .ContributionCents 0}} ({{call $.Format .ContributionCents}}){{end}}</label>
+<br />{{end}}
+<label for="raffle_name">Raffle Name:</label><input type="text" id="raffle_name" name="raffle_name"><br/>
+<input type="submit" value="Create Raffle">
 </body></html>`,
-))
+	))
 
 	login := auth.Get(req)
 	if login == nil {
