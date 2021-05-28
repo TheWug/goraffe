@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"fmt"
 	"strings"
+
+	"github.com/jmoiron/jsonq"
 )
 
 var BadLogin error = errors.New("Invalid or expired patreon auth token")
