@@ -28,6 +28,7 @@ type ClientSettings struct {
 	DatabaseUrl            string `json:"database_url"`
 	AESPasskey1            string `json:"aes_passkey_1"`
 	AESPasskey2            string `json:"aes_passkey_2"`
+	Bindhost               string `json:"bindhost"`
 }
 
 func GetClientSettings() ClientSettings {
@@ -562,7 +563,7 @@ func main() {
 	http.HandleFunc(fmt.Sprintf(web.PATH_RAFFLE, ""), ShowRaffle)
 	http.HandleFunc(web.PATH_SCRIPT, Script)
 	http.HandleFunc(fmt.Sprintf(web.PATH_WEBSOCKET, ""), web.WebSocket)
-	err := http.ListenAndServe(":3001", nil)
+	err := http.ListenAndServe(settings.Bindhost, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
 	}
