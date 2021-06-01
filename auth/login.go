@@ -66,15 +66,17 @@ func (s *Session) UnmarshalJSON(j []byte) error {
 	return nil
 }
 
-const aes_keystring string = "One may opine for an eternity about what makes a password secure, but in reality, it's all about luck, and setting oneself up to be lucky. 69 420 funny numb3r haha!@$%^&"
-const aes_keycoder  string = "xxxxxxxxxx69.420.000000000000000"
 var aes_key []byte = nil
+
+func Init(key, coder string) {
+	mac := hmac.New(sha256.New, []byte(coder))
+	mac.Write([]byte(key))
+	aes_key = mac.Sum(nil)[0:32]
+}
 
 func getEncryptionKey() []byte {
 	if aes_key == nil {
-		mac := hmac.New(sha256.New, []byte(aes_keycoder))
-		mac.Write([]byte(aes_keystring))
-		aes_key = mac.Sum(nil)[0:32]
+		panic("call Init first!")
 	}
 	return aes_key
 }

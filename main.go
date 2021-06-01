@@ -17,6 +17,8 @@ type ClientSettings struct {
 	PatreonApiClientId     string `json:"patreon_api_client_id"`
 	PatreonApiClientSecret string `json:"patreon_api_client_secret"`
 	PatreonLoginRedirect   string `json:"patreon_login_redirect"`
+	AESPasskey1            string `json:"aes_passkey_1"`
+	AESPasskey2            string `json:"aes_passkey_2"`
 }
 
 func GetClientSettings() ClientSettings {
@@ -75,6 +77,8 @@ func NewRaffle(w http.ResponseWriter, req *http.Request) {
 
 func main() {
 	fmt.Println("goraffe!")
+	settings := GetClientSettings()
+	auth.Init(settings.AESPasskey1, settings.AESPasskey2)
 	http.HandleFunc(web.PATH_NEW_RAFFLE, NewRaffle)
 	http.HandleFunc(web.PATH_LINK_ACCOUNT, LinkAccount)
 	err := http.ListenAndServe(":3001", nil)
